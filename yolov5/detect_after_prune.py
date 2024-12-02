@@ -120,15 +120,15 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
     )
 
     
-    base_macs, base_nparams = tp.utils.count_ops_and_params(model, example_inputs)
+    #base_macs, base_nparams = tp.utils.count_ops_and_params(model, example_inputs)
     for g in pruner.step(interactive=True):
         print(g)
         g.prune()
 
-    pruned_macs, pruned_nparams = tp.utils.count_ops_and_params(model, example_inputs)
+    #runed_macs, pruned_nparams = tp.utils.count_ops_and_params(model, example_inputs)
     #print(model)
-    print("Before Pruning: MACs=%f G, #Params=%f G"%(base_macs/1e9, base_nparams/1e9))
-    print("After Pruning: MACs=%f G, #Params=%f G"%(pruned_macs/1e9, pruned_nparams/1e9))
+    #print("Before Pruning: MACs=%f G, #Params=%f G"%(base_macs/1e9, base_nparams/1e9))
+    #print("After Pruning: MACs=%f G, #Params=%f G"%(pruned_macs/1e9, pruned_nparams/1e9))
     ####################################################################################
 
     # Half
