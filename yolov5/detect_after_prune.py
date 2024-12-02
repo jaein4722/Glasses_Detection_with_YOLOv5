@@ -47,7 +47,7 @@ from utils.plots import Annotator, colors, save_one_box
 from utils.torch_utils import select_device, time_sync
 
 
-@torch.no_grad()
+# @torch.no_grad()
 def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
         source=ROOT / 'data/images',  # file/dir/URL/glob, 0 for webcam
         data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
@@ -95,41 +95,40 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
     
     ####################################################################################
     import torch_pruning as tp
-    with torch.no_grad():
-        #print(model.model)
-        for p in model.parameters():
-            p.requires_grad_(True)
+    #print(model.model)
+    for p in model.parameters():
+        p.requires_grad_(True)
 
-        example_inputs = torch.randn(1, 3, 224, 224).to(device)
-        imp = tp.importance.MagnitudeImportance(p=2) # L2 norm pruning
+    example_inputs = torch.randn(1, 3, 224, 224).to(device)
+    imp = tp.importance.MagnitudeImportance(p=2) # L2 norm pruning
 
-        ignored_layers = []
-        from models.yolo import Detect
-        for m in model.model.modules():
-            if isinstance(m, Detect):
-                ignored_layers.append(m)
-        #print(ignored_layers)
+    ignored_layers = []
+    from models.yolo import Detect
+    for m in model.model.modules():
+        if isinstance(m, Detect):
+            ignored_layers.append(m)
+    #print(ignored_layers)
 
-        iterative_steps = 1 # progressive pruning
-        pruner = tp.pruner.MagnitudePruner(
-            model.model,
-            example_inputs,
-            importance=imp,
-            iterative_steps=iterative_steps,
-            pruning_ratio=0.5, # remove 50% channels, ResNet18 = {64, 128, 256, 512} => ResNet18_Half = {32, 64, 128, 256}
-            ignored_layers=ignored_layers,
-        )
+    iterative_steps = 1 # progressive pruning
+    pruner = tp.pruner.MagnitudePruner(
+        model.model,
+        example_inputs,
+        importance=imp,
+        iterative_steps=iterative_steps,
+        pruning_ratio=0.5, # remove 50% channels, ResNet18 = {64, 128, 256, 512} => ResNet18_Half = {32, 64, 128, 256}
+        ignored_layers=ignored_layers,
+    )
 
-        
-        base_macs, base_nparams = tp.utils.count_ops_and_params(model, example_inputs)
-        for g in pruner.step(interactive=True):
-            print(g)
-            g.prune()
+    
+    base_macs, base_nparams = tp.utils.count_ops_and_params(model, example_inputs)
+    for g in pruner.step(interactive=True):
+        print(g)
+        g.prune()
 
-        pruned_macs, pruned_nparams = tp.utils.count_ops_and_params(model, example_inputs)
-        #print(model)
-        print("Before Pruning: MACs=%f G, #Params=%f G"%(base_macs/1e9, base_nparams/1e9))
-        print("After Pruning: MACs=%f G, #Params=%f G"%(pruned_macs/1e9, pruned_nparams/1e9))
+    pruned_macs, pruned_nparams = tp.utils.count_ops_and_params(model, example_inputs)
+    #print(model)
+    print("Before Pruning: MACs=%f G, #Params=%f G"%(base_macs/1e9, base_nparams/1e9))
+    print("After Pruning: MACs=%f G, #Params=%f G"%(pruned_macs/1e9, pruned_nparams/1e9))
     ####################################################################################
 
     # Half
