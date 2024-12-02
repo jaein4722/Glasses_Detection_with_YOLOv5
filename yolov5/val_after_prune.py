@@ -92,7 +92,7 @@ def process_batch(detections, labels, iouv):
     return correct
 
 
-@torch.no_grad()
+#@torch.no_grad()
 def run(data,
         weights=None,  # model.pt path(s)
         batch_size=32,  # batch size
