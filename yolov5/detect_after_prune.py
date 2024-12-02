@@ -119,6 +119,7 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
         iterative_steps=iterative_steps,
         pruning_ratio=prune, # remove 50% channels, ResNet18 = {64, 128, 256, 512} => ResNet18_Half = {32, 64, 128, 256}
         ignored_layers=ignored_layers,
+        round_to=8,
     )
 
     
